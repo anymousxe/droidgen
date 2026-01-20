@@ -43,34 +43,25 @@ const elements = {
     userAvatar: $('#user-avatar'),
     settingsBtn: $('#settings-btn'),
     settingsModal: $('#settings-modal'),
-    adminModal: $('#admin-modal'),
     settingsAvatar: $('#settings-avatar'),
     settingsEmail: $('#settings-email'),
     settingsCredits: $('#settings-credits'),
     logoutBtn: $('#logout-btn'),
-    changeEmailBtn: $('#change-email-btn'),
     promptInput: $('#prompt-input'),
-    sendBtn: $('#send-btn'),
-    modelBtn: $('#model-btn'),
+    generateBtn: $('#generate-btn'),
+    modelSelector: $('#model-selector'),
     modelDropdown: $('#model-dropdown'),
-    selectedModel: $('#selected-model'),
-    outputContent: $('#output-content'),
-    loadingIndicator: $('#loading-indicator'),
-    versionsSidebar: $('#versions-sidebar'),
-    versionsList: $('#versions-list'),
-    toggleVersions: $('#toggle-versions'),
-    closeSidebar: $('#close-sidebar'),
-    filesGrid: $('#files-grid'),
-    uploadBtn: $('#upload-btn'),
-    fileInput: $('#file-input'),
-    mentionsDropdown: $('#mentions-dropdown'),
-    attachedFiles: $('#attached-files'),
-    recentList: $('#recent-list'),
+    currentModel: $('#current-model'),
+    loadingOverlay: $('#loading-overlay'),
+    versionList: $('#version-list'),
+    fileList: $('#file-list'),
     toastContainer: $('#toast-container'),
-    adminEmailInput: $('#admin-email-input'),
-    adminCreditsInput: $('#admin-credits-input'),
-    adminGiveCredits: $('#admin-give-credits'),
-    adminResult: $('#admin-result')
+    dropdownName: $('#dropdown-name'),
+    dropdownEmail: $('#dropdown-email'),
+    settingsEmailDisplay: $('#settings-email-display'),
+    settingsCreditsDisplay: $('#settings-credits-display'),
+    settingsUsername: $('#settings-username'),
+    saveSettings: $('#save-settings')
 };
 
 function showToast(message, type = 'success') {
@@ -110,11 +101,13 @@ function switchScreen(screen) {
     screen.classList.add('active');
 }
 
-function switchTab(tabName) {
-    $$('.nav-tab').forEach(t => t.classList.remove('active'));
-    $(`.nav-tab[data-tab="${tabName}"]`).classList.add('active');
-    $$('.tab-content').forEach(c => c.classList.remove('active'));
-    $(`#${tabName}-tab`).classList.add('active');
+function switchView(viewName) {
+    $$('.sidebar-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.view === viewName);
+    });
+    $$('.view').forEach(view => {
+        view.classList.toggle('active', view.id === `${viewName}-view`);
+    });
 }
 
 async function initUser(user) {
@@ -161,19 +154,20 @@ function updateUI() {
         elements.settingsAvatar.style.backgroundImage = `url(${state.user.photoURL})`;
     }
     
-    elements.settingsEmail.textContent = state.user?.email || '';
-    elements.settingsCredits.textContent = `${state.credits.toLocaleString()} credits`;
+    elements.dropdownName.textContent = state.user?.displayName || state.user?.email?.split('@')[0] || 'User';
+    elements.dropdownEmail.textContent = state.user?.email || '';
+    elements.settingsEmailDisplay.textContent = state.user?.email || '';
+    elements.settingsCreditsDisplay.textContent = `${state.credits.toLocaleString()} credits`;
     
     renderVersions();
     renderFiles();
-    renderRecent();
     
-    elements.sendBtn.disabled = !elements.promptInput.value.trim() || state.isGenerating;
+    elements.generateBtn.disabled = !elements.promptInput.value.trim() || state.isGenerating;
 }
 
 function renderVersions() {
     if (state.versions.length === 0) {
-        elements.versionsList.innerHTML = `
+        elements.versionList.innerHTML = `
             <div class="empty-state" style="padding: 40px 20px;">
                 <i class="fas fa-history" style="font-size: 32px;"></i>
                 <p style="margin-top: 12px;">No versions yet</p>
@@ -182,124 +176,29 @@ function renderVersions() {
         return;
     }
     
-    elements.versionsList.innerHTML = state.versions.map((v, i) => `
-        <div class="version-item ${v.pinned ? 'pinned' : ''}" data-index="${i}">
-            <div class="version-header">
-                <span class="version-number">v${state.versions.length - i}</span>
-                <div class="version-actions">
-                    <button class="pin-btn" title="${v.pinned ? 'Unpin' : 'Pin as main'}">
-                        <i class="fas fa-thumbtack"></i>
-                    </button>
-                    <button class="delete-btn" title="Delete version">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="version-preview">${v.prompt.substring(0, 50)}...</div>
-            <div class="version-date">${new Date(v.createdAt).toLocaleString()}</div>
+    elements.versionList.innerHTML = state.versions.map((v, i) => `
+        <div class="version-item" data-index="${i}">
+            <div class="v-num">v${state.versions.length - i}</div>
+            <div class="v-time">${new Date(v.createdAt).toLocaleString()}</div>
         </div>
     `).join('');
 }
 
 function renderFiles() {
     if (state.files.length === 0) {
-        elements.filesGrid.innerHTML = `
-            <div class="empty-state" style="grid-column: 1/-1; padding: 60px 20px;">
-                <i class="fas fa-folder-open"></i>
-                <p>No files uploaded yet</p>
-            </div>
-        `;
-        return;
-    }
-    
-    elements.filesGrid.innerHTML = state.files.map((f, i) => `
-        <div class="file-card" data-index="${i}">
-            <div class="file-preview">
-                ${f.type.startsWith('image/') 
-                    ? `<img src="${f.dataUrl}" alt="${f.name}">`
-                    : `<i class="fas fa-${f.type.startsWith('audio/') ? 'music' : 'video'}"></i>`
-                }
-            </div>
-            <div class="file-info">
-                <div class="file-name">${f.name}</div>
-                <div class="file-size">${formatFileSize(f.size)}</div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function renderRecent() {
-    const recent = state.versions.slice(0, 5);
-    
-    if (recent.length === 0) {
-        elements.recentList.innerHTML = `
+        elements.fileList.innerHTML = `
             <div class="empty-state" style="padding: 40px 20px;">
-                <i class="fas fa-clock"></i>
-                <p>No recent generations</p>
+                <i class="fas fa-folder-open"></i>
+                <p>No files yet</p>
             </div>
         `;
         return;
     }
     
-    elements.recentList.innerHTML = recent.map((v, i) => `
-        <div class="recent-item" data-index="${i}">
-            <div class="icon">
-                <i class="fas fa-wand-magic-sparkles"></i>
-            </div>
-            <div class="info">
-                <div class="title">${v.prompt.substring(0, 40)}...</div>
-                <div class="date">${new Date(v.createdAt).toLocaleString()}</div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function formatFileSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-}
-
-function showMentionsDropdown() {
-    if (state.files.length === 0) {
-        elements.mentionsDropdown.innerHTML = `
-            <div style="padding: 16px; text-align: center; color: var(--text-muted);">
-                No files to mention
-            </div>
-        `;
-    } else {
-        elements.mentionsDropdown.innerHTML = state.files.map((f, i) => `
-            <div class="mention-item" data-index="${i}">
-                <div class="icon">
-                    <i class="fas fa-${f.type.startsWith('image/') ? 'image' : f.type.startsWith('audio/') ? 'music' : 'video'}"></i>
-                </div>
-                <span class="name">${f.name}</span>
-            </div>
-        `).join('');
-    }
-    
-    elements.mentionsDropdown.classList.add('open');
-}
-
-function hideMentionsDropdown() {
-    elements.mentionsDropdown.classList.remove('open');
-}
-
-function attachFile(file) {
-    if (state.attachedFiles.find(f => f.name === file.name)) return;
-    
-    state.attachedFiles.push(file);
-    renderAttachedFiles();
-}
-
-function renderAttachedFiles() {
-    elements.attachedFiles.innerHTML = state.attachedFiles.map((f, i) => `
-        <div class="attached-file">
-            <i class="fas fa-${f.type.startsWith('image/') ? 'image' : f.type.startsWith('audio/') ? 'music' : 'video'}"></i>
-            <span>${f.name}</span>
-            <button class="remove" data-index="${i}">
-                <i class="fas fa-times"></i>
-            </button>
+    elements.fileList.innerHTML = state.files.map((f, i) => `
+        <div class="file-item" data-index="${i}">
+            <i class="fas fa-file-code"></i>
+            <span class="fname">${f.name}</span>
         </div>
     `).join('');
 }
@@ -319,16 +218,8 @@ async function handleGenerate() {
     }
     
     state.isGenerating = true;
-    elements.loadingIndicator.classList.add('active');
-    elements.sendBtn.disabled = true;
-    switchTab('workspace');
-    
-    elements.outputContent.innerHTML = `
-        <div class="generating-state" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-            <div class="loading-spinner"></div>
-            <p style="margin-top:16px;color:var(--text-secondary);">Generating with ${state.selectedModel.name}...</p>
-        </div>
-    `;
+    elements.loadingOverlay.classList.add('active');
+    elements.generateBtn.disabled = true;
     
     try {
         const response = await fetch('/api/generate', {
@@ -369,32 +260,177 @@ async function handleGenerate() {
             
             state.versions.unshift(newVersion);
             
-            renderOutput(data.output);
+            if (data.files && data.files.length > 0) {
+                state.files = data.files;
+            }
+            
             updateUI();
             showToast('Generation complete!');
             
             elements.promptInput.value = '';
             state.attachedFiles = [];
-            renderAttachedFiles();
+            
+            switchView('editor');
         } else {
             throw new Error(data.error || 'Generation failed');
         }
     } catch (error) {
         console.error('Generation error:', error);
         showToast(error.message, 'error');
-        elements.outputContent.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
-                <p>${error.message}</p>
-            </div>
-        `;
     } finally {
         state.isGenerating = false;
-        elements.loadingIndicator.classList.remove('active');
-        elements.sendBtn.disabled = false;
+        elements.loadingOverlay.classList.remove('active');
+        elements.generateBtn.disabled = false;
     }
 }
 
-function renderOutput(content) {
-    const formatted = content
-        .replace(/
+async function handleLogout() {
+    try {
+        await auth.signOut();
+        state.user = null;
+        state.credits = 0;
+        state.versions = [];
+        state.files = [];
+        switchScreen(elements.authScreen);
+        showToast('Logged out successfully');
+    } catch (error) {
+        showToast('Logout failed', 'error');
+    }
+}
+
+async function handleGoogleLogin() {
+    if (state.isLoggingIn) return;
+    
+    setLoginLoading(true);
+    
+    try {
+        const result = await auth.signInWithPopup(googleProvider);
+        if (result.user) {
+            await initUser(result.user);
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        if (error.code === 'auth/popup-closed-by-user') {
+            showToast('Login cancelled', 'error');
+        } else if (error.code === 'auth/popup-blocked') {
+            showToast('Popup blocked - please allow popups', 'error');
+        } else {
+            showToast(error.message || 'Login failed', 'error');
+        }
+    } finally {
+        setLoginLoading(false);
+    }
+}
+
+function initEventListeners() {
+    elements.googleLogin.addEventListener('click', handleGoogleLogin);
+    
+    elements.logoutBtn.addEventListener('click', handleLogout);
+    
+    elements.settingsBtn.addEventListener('click', () => {
+        elements.settingsModal.classList.add('open');
+    });
+    
+    $$('.modal-close, .modal-backdrop').forEach(el => {
+        el.addEventListener('click', () => {
+            $$('.modal').forEach(m => m.classList.remove('open'));
+        });
+    });
+    
+    elements.promptInput.addEventListener('input', () => {
+        elements.generateBtn.disabled = !elements.promptInput.value.trim() || state.isGenerating;
+    });
+    
+    elements.promptInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleGenerate();
+        }
+    });
+    
+    elements.generateBtn.addEventListener('click', handleGenerate);
+    
+    elements.modelSelector.addEventListener('click', () => {
+        elements.modelDropdown.classList.toggle('open');
+    });
+    
+    $$('.model-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            if (opt.classList.contains('disabled')) return;
+            
+            const modelId = opt.dataset.model;
+            const modelName = opt.querySelector('.name').textContent;
+            const modelCost = parseInt(opt.dataset.cost);
+            
+            state.selectedModel = { id: modelId, name: modelName, cost: modelCost };
+            elements.currentModel.textContent = modelName;
+            
+            $$('.model-option').forEach(o => o.classList.remove('active'));
+            opt.classList.add('active');
+            
+            elements.modelDropdown.classList.remove('open');
+        });
+    });
+    
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.prompt-model')) {
+            elements.modelDropdown.classList.remove('open');
+        }
+        if (!e.target.closest('.user-menu')) {
+            $('#user-menu')?.classList.remove('open');
+        }
+    });
+    
+    $('#user-avatar').addEventListener('click', () => {
+        $('#user-menu').classList.toggle('open');
+    });
+    
+    $$('.sidebar-item').forEach(item => {
+        item.addEventListener('click', () => {
+            switchView(item.dataset.view);
+        });
+    });
+    
+    elements.saveSettings.addEventListener('click', async () => {
+        const username = elements.settingsUsername.value.trim();
+        if (!username) {
+            showToast('Username is required', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'update_username',
+                    userId: state.user.uid,
+                    username: username
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showToast('Settings saved!');
+                elements.settingsModal.classList.remove('open');
+            } else {
+                showToast(data.error || 'Failed to save settings', 'error');
+            }
+        } catch (error) {
+            showToast('Failed to save settings', 'error');
+        }
+    });
+}
+
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        await initUser(user);
+    } else {
+        switchScreen(elements.authScreen);
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    initEventListeners();
+});
