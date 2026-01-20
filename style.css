@@ -122,10 +122,11 @@ body {
 .auth-logo { margin-bottom: 8px; }
 
 .logo-img {
-    width: 72px;
-    height: 72px;
-    border-radius: var(--radius-lg);
-    margin-bottom: 16px;
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .auth-logo h1 {
