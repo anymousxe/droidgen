@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Droidgen - AI Workspace</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div id="app">
+        <div id="auth-screen" class="screen active">
+            <div class="glass-card auth-card">
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h1>Droidgen</h1>
+                    <p class="tagline">AI Workspace</p>
+                </div>
+                <button id="google-login" class="glass-btn primary">
+                    <i class="fab fa-google"></i>
+                    <span>Continue with Google</span>
+                </button>
+                <p class="demo-notice">
+                    <i class="fas fa-gift"></i>
+                    Demo: Start with 100K credits!
+                </p>
+            </div>
+            <div class="floating-orbs">
+                <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
+                <div class="orb orb-3"></div>
+            </div>
+        </div>
+
+        <div id="main-screen" class="screen">
+            <nav class="glass-nav">
+                <div class="nav-left">
+                    <div class="logo-small">
+                        <i class="fas fa-robot"></i>
+                        <span>Droidgen</span>
+                    </div>
+                </div>
+                <div class="nav-center">
+                    <div class="nav-tabs">
+                        <button class="nav-tab active" data-tab="feed">
+                            <i class="fas fa-stream"></i>
+                            <span>Feed</span>
+                        </button>
+                        <button class="nav-tab" data-tab="workspace">
+                            <i class="fas fa-code"></i>
+                            <span>Workspace</span>
+                        </button>
+                        <button class="nav-tab" data-tab="files">
+                            <i class="fas fa-folder"></i>
+                            <span>Files</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="nav-right">
+                    <div class="credits-display glass-pill">
+                        <i class="fas fa-coins"></i>
+                        <span id="credits-count">0</span>
+                    </div>
+                    <button id="settings-btn" class="icon-btn">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <div id="user-avatar" class="avatar"></div>
+                </div>
+            </nav>
+
+            <main class="main-content">
+                <div id="feed-tab" class="tab-content active">
+                    <div class="feed-container">
+                        <div class="feed-header glass-card">
+                            <h2>Welcome back!</h2>
+                            <p>What would you like to create today?</p>
+                        </div>
+                        <div class="quick-actions">
+                            <button class="quick-action glass-card" data-prompt="Create a landing page">
+                                <i class="fas fa-globe"></i>
+                                <span>Landing Page</span>
+                            </button>
+                            <button class="quick-action glass-card" data-prompt="Build a dashboard">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Dashboard</span>
+                            </button>
+                            <button class="quick-action glass-card" data-prompt="Design a mobile app">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span>Mobile App</span>
+                            </button>
+                            <button class="quick-action glass-card" data-prompt="Create an API">
+                                <i class="fas fa-server"></i>
+                                <span>API</span>
+                            </button>
+                        </div>
+                        <div class="recent-section">
+                            <h3>Recent Generations</h3>
+                            <div id="recent-list" class="recent-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="workspace-tab" class="tab-content">
+                    <div class="workspace-container">
+                        <div class="output-area glass-card">
+                            <div id="output-content" class="output-content">
+                                <div class="empty-state">
+                                    <i class="fas fa-wand-magic-sparkles"></i>
+                                    <p>Your AI-generated content will appear here</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="files-tab" class="tab-content">
+                    <div class="files-container">
+                        <div class="files-header">
+                            <h2>Your Files</h2>
+                            <button id="upload-btn" class="glass-btn">
+                                <i class="fas fa-upload"></i>
+                                <span>Upload</span>
+                            </button>
+                            <input type="file" id="file-input" hidden multiple accept="image/*,audio/*,video/*">
+                        </div>
+                        <div id="files-grid" class="files-grid"></div>
+                    </div>
+                </div>
+
+                <aside id="versions-sidebar" class="versions-sidebar glass-card">
+                    <div class="sidebar-header">
+                        <h3>Version History</h3>
+                        <button id="close-sidebar" class="icon-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div id="versions-list" class="versions-list"></div>
+                </aside>
+
+                <button id="toggle-versions" class="toggle-versions-btn glass-btn">
+                    <i class="fas fa-history"></i>
+                </button>
+            </main>
+
+            <div class="prompt-container">
+                <div class="prompt-bar glass-card">
+                    <div class="model-selector">
+                        <button id="model-btn" class="model-btn">
+                            <span id="selected-model">MiMo 2 Flash</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div id="model-dropdown" class="model-dropdown glass-card">
+                            <button class="model-option active" data-model="xiaomi/mimo-v2-flash:free" data-cost="300" data-name="MiMo 2 Flash">
+                                <span class="model-name">MiMo 2 Flash</span>
+                                <span class="model-cost">300 credits</span>
+                            </button>
+                            <button class="model-option" data-model="mistralai/devstral-2512:free" data-cost="100" data-name="Devstral 2">
+                                <span class="model-name">Devstral 2</span>
+                                <span class="model-cost">100 credits</span>
+                            </button>
+                            <button class="model-option" data-model="z-ai/glm-4.5-air:free" data-cost="100" data-name="GLM 4.5 Air">
+                                <span class="model-name">GLM 4.5 Air</span>
+                                <span class="model-cost">100 credits</span>
+                            </button>
+                            <button class="model-option" data-model="openai/gpt-oss-120b:free" data-cost="50" data-name="GPT OSS">
+                                <span class="model-name">GPT OSS</span>
+                                <span class="model-cost">50 credits</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="input-wrapper">
+                        <div id="mentions-dropdown" class="mentions-dropdown glass-card"></div>
+                        <textarea id="prompt-input" placeholder="Describe what you want to create... Use @ to mention files" rows="1"></textarea>
+                        <div id="attached-files" class="attached-files"></div>
+                    </div>
+                    <button id="send-btn" class="send-btn" disabled>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div id="loading-indicator" class="loading-indicator">
+                    <div class="loading-spinner"></div>
+                    <span>Generating...</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings-modal" class="modal">
+            <div class="modal-overlay"></div>
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h2>Settings</h2>
+                    <button class="close-modal icon-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-section">
+                        <h3>Account</h3>
+                        <div class="user-info">
+                            <div id="settings-avatar" class="avatar large"></div>
+                            <div class="user-details">
+                                <p id="settings-email" class="user-email"></p>
+                                <p id="settings-credits" class="user-credits"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-actions">
+                        <button id="change-email-btn" class="glass-btn">
+                            <i class="fas fa-envelope"></i>
+                            <span>Update Email</span>
+                        </button>
+                        <button id="logout-btn" class="glass-btn danger">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-modal" class="modal">
+            <div class="modal-overlay"></div>
+            <div class="modal-content glass-card admin-panel">
+                <div class="modal-header">
+                    <h2><i class="fas fa-shield-alt"></i> Admin Panel</h2>
+                    <button class="close-modal icon-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="admin-section">
+                        <h3>Give Credits</h3>
+                        <div class="admin-form">
+                            <input type="email" id="admin-email-input" placeholder="User email" class="glass-input">
+                            <input type="number" id="admin-credits-input" placeholder="Credits amount" class="glass-input">
+                            <button id="admin-give-credits" class="glass-btn primary">
+                                <i class="fas fa-coins"></i>
+                                <span>Give Credits</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="admin-result" class="admin-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="toast-container" class="toast-container"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="app.js"></script>
+  <script src="/script.js"></script>
+  <script src="/script1.js"></script>
+</body>
+</html>
