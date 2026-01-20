@@ -10,6 +10,10 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+googleProvider.setCustomParameters({
+    prompt: 'select_account'
+});
 
 const state = {
     user: null,
@@ -24,7 +28,8 @@ const state = {
     attachedFiles: [],
     versions: [],
     isGenerating: false,
-    currentOutput: ''
+    currentOutput: '',
+    isLoggingIn: false
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -80,7 +85,24 @@ function showToast(message, type = 'success') {
     setTimeout(() => {
         toast.classList.add('removing');
         setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, 4000);
+}
+
+function setLoginLoading(loading) {
+    state.isLoggingIn = loading;
+    if (loading) {
+        elements.googleLogin.innerHTML = `
+            <div class="loading-spinner" style="width:20px;height:20px;border-width:2px;"></div>
+            <span>Signing in...</span>
+        `;
+        elements.googleLogin.disabled = true;
+    } else {
+        elements.googleLogin.innerHTML = `
+            <i class="fab fa-google"></i>
+            <span>Continue with Google</span>
+        `;
+        elements.googleLogin.disabled = false;
+    }
 }
 
 function switchScreen(screen) {
@@ -116,14 +138,19 @@ async function initUser(user) {
             state.isAdmin = data.isAdmin;
             state.versions = data.versions || [];
             state.files = data.files || [];
+        } else {
+            console.warn('Init returned:', data);
+            state.credits = 100000;
         }
     } catch (error) {
         console.error('Init error:', error);
-        showToast('Failed to initialize user', 'error');
+        state.credits = 100000;
+        showToast('Running in offline mode', 'error');
     }
     
     updateUI();
     switchScreen(elements.mainScreen);
+    showToast(`Welcome, ${user.displayName || user.email}!`);
 }
 
 function updateUI() {
@@ -297,9 +324,9 @@ async function handleGenerate() {
     switchTab('workspace');
     
     elements.outputContent.innerHTML = `
-        <div class="generating-state">
+        <div class="generating-state" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
             <div class="loading-spinner"></div>
-            <p>Generating with ${state.selectedModel.name}...</p>
+            <p style="margin-top:16px;color:var(--text-secondary);">Generating with ${state.selectedModel.name}...</p>
         </div>
     `;
     
@@ -309,7 +336,8 @@ async function handleGenerate() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'generate',
-                userId: state.user.uid,prompt: prompt,
+                userId: state.user.uid,
+                prompt: prompt,
                 model: state.selectedModel.id,
                 cost: state.selectedModel.cost,
                 files: state.attachedFiles.map(f => ({
@@ -369,333 +397,4 @@ async function handleGenerate() {
 
 function renderOutput(content) {
     const formatted = content
-        .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>')
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-        .replace(/\n/g, '<br>');
-    
-    elements.outputContent.innerHTML = `<div class="output-text">${formatted}</div>`;
-}
-
-async function handleVersionAction(index, action) {
-    const version = state.versions[index];
-    
-    if (action === 'pin') {
-        state.versions.forEach(v => v.pinned = false);
-        version.pinned = !version.pinned;
-        
-        if (version.pinned) {
-            state.currentOutput = version.output;
-            renderOutput(version.output);
-        }
-        
-        renderVersions();
-        showToast(version.pinned ? 'Version pinned as main' : 'Version unpinned');
-    } else if (action === 'delete') {
-        state.versions.splice(index, 1);
-        renderVersions();
-        renderRecent();
-        showToast('Version deleted');
-    } else if (action === 'view') {
-        state.currentOutput = version.output;
-        renderOutput(version.output);
-        switchTab('workspace');
-    }
-    
-    try {
-        await fetch('/api/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'update_versions',
-                userId: state.user.uid,
-                versions: state.versions
-            })
-        });
-    } catch (error) {
-        console.error('Failed to sync versions:', error);
-    }
-}
-
-async function handleFileUpload(files) {
-    for (const file of files) {
-        if (file.size > 10 * 1024 * 1024) {
-            showToast(`${file.name} is too large (max 10MB)`, 'error');
-            continue;
-        }
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const newFile = {
-                id: Date.now().toString(),
-                name: file.name,
-                type: file.type,
-                size: file.size,
-                dataUrl: e.target.result
-            };
-            
-            state.files.push(newFile);
-            renderFiles();
-            showToast(`${file.name} uploaded`);
-            
-            syncFiles();
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-async function syncFiles() {
-    try {
-        await fetch('/api/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'update_files',
-                userId: state.user.uid,
-                files: state.files.map(f => ({
-                    id: f.id,
-                    name: f.name,
-                    type: f.type,
-                    size: f.size
-                }))
-            })
-        });
-    } catch (error) {
-        console.error('Failed to sync files:', error);
-    }
-}
-
-async function handleAdminGiveCredits() {
-    const email = elements.adminEmailInput.value.trim();
-    const credits = parseInt(elements.adminCreditsInput.value);
-    
-    if (!email || !credits || credits <= 0) {
-        elements.adminResult.className = 'admin-result error';
-        elements.adminResult.textContent = 'Please enter valid email and credits amount';
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'admin_give_credits',
-                adminId: state.user.uid,
-                targetEmail: email,
-                credits: credits
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            elements.adminResult.className = 'admin-result success';
-            elements.adminResult.textContent = `Successfully gave ${credits} credits to ${email}`;
-            elements.adminEmailInput.value = '';
-            elements.adminCreditsInput.value = '';
-        } else {
-            throw new Error(data.error);
-        }
-    } catch (error) {
-        elements.adminResult.className = 'admin-result error';
-        elements.adminResult.textContent = error.message;
-    }
-}
-
-elements.googleLogin.addEventListener('click', async () => {
-    try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        await auth.signInWithPopup(provider);
-    } catch (error) {
-        console.error('Login error:', error);
-        showToast('Login failed', 'error');
-    }
-});
-
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        initUser(user);
-    } else {
-        state.user = null;
-        switchScreen(elements.authScreen);
-    }
-});
-
-elements.logoutBtn.addEventListener('click', async () => {
-    try {
-        await auth.signOut();
-        showToast('Logged out successfully');
-    } catch (error) {
-        showToast('Logout failed', 'error');
-    }
-});
-
-elements.changeEmailBtn.addEventListener('click', async () => {
-    const newEmail = prompt('Enter new email address:');
-    if (!newEmail) return;
-    
-    try {
-        await state.user.verifyBeforeUpdateEmail(newEmail);
-        showToast('Verification email sent to ' + newEmail);
-    } catch (error) {
-        showToast(error.message, 'error');
-    }
-});
-
-$$('.nav-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-        switchTab(tab.dataset.tab);
-    });
-});
-
-elements.settingsBtn.addEventListener('click', () => {
-    elements.settingsModal.classList.add('open');
-});
-
-elements.userAvatar.addEventListener('click', () => {
-    if (state.isAdmin) {
-        elements.adminModal.classList.add('open');
-    } else {
-        elements.settingsModal.classList.add('open');
-    }
-});
-
-$$('.modal-overlay, .close-modal').forEach(el => {
-    el.addEventListener('click', () => {
-        $$('.modal').forEach(m => m.classList.remove('open'));
-    });
-});
-
-elements.modelBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    elements.modelBtn.parentElement.classList.toggle('open');
-});
-
-$$('.model-option').forEach(opt => {
-    opt.addEventListener('click', () => {
-        $$('.model-option').forEach(o => o.classList.remove('active'));
-        opt.classList.add('active');
-        
-        state.selectedModel = {
-            id: opt.dataset.model,
-            name: opt.dataset.name,
-            cost: parseInt(opt.dataset.cost)
-        };
-        
-        elements.selectedModel.textContent = opt.dataset.name;
-        elements.modelBtn.parentElement.classList.remove('open');
-    });
-});
-
-document.addEventListener('click', () => {
-    elements.modelBtn.parentElement.classList.remove('open');
-    hideMentionsDropdown();
-});
-
-elements.promptInput.addEventListener('input', (e) => {
-    e.target.style.height = 'auto';
-    e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px';
-    
-    elements.sendBtn.disabled = !e.target.value.trim() || state.isGenerating;
-    
-    const value = e.target.value;
-    const lastAtIndex = value.lastIndexOf('@');
-    
-    if (lastAtIndex !== -1 && lastAtIndex === value.length - 1) {
-        showMentionsDropdown();
-    } else {
-        hideMentionsDropdown();
-    }
-});
-
-elements.promptInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        handleGenerate();
-    }
-});
-
-elements.sendBtn.addEventListener('click', handleGenerate);
-
-elements.mentionsDropdown.addEventListener('click', (e) => {
-    const item = e.target.closest('.mention-item');
-    if (item) {
-        const file = state.files[item.dataset.index];
-        attachFile(file);
-        
-        const value = elements.promptInput.value;
-        elements.promptInput.value = value.slice(0, -1) + `@${file.name} `;
-        hideMentionsDropdown();
-        elements.promptInput.focus();
-    }
-});
-
-elements.attachedFiles.addEventListener('click', (e) => {
-    const removeBtn = e.target.closest('.remove');
-    if (removeBtn) {
-        state.attachedFiles.splice(removeBtn.dataset.index, 1);
-        renderAttachedFiles();
-    }
-});
-
-elements.toggleVersions.addEventListener('click', () => {
-    elements.versionsSidebar.classList.toggle('open');
-});
-
-elements.closeSidebar.addEventListener('click', () => {
-    elements.versionsSidebar.classList.remove('open');
-});
-
-elements.versionsList.addEventListener('click', (e) => {
-    const item = e.target.closest('.version-item');
-    const pinBtn = e.target.closest('.pin-btn');
-    const deleteBtn = e.target.closest('.delete-btn');
-    
-    if (pinBtn && item) {
-        handleVersionAction(parseInt(item.dataset.index), 'pin');
-    } else if (deleteBtn && item) {
-        handleVersionAction(parseInt(item.dataset.index), 'delete');
-    } else if (item) {
-        handleVersionAction(parseInt(item.dataset.index), 'view');
-    }
-});
-
-elements.uploadBtn.addEventListener('click', () => {
-    elements.fileInput.click();
-});
-
-elements.fileInput.addEventListener('change', (e) => {
-    handleFileUpload(e.target.files);
-    e.target.value = '';
-});
-
-$$('.quick-action').forEach(action => {
-    action.addEventListener('click', () => {
-        elements.promptInput.value = action.dataset.prompt;
-        elements.promptInput.dispatchEvent(new Event('input'));
-        switchTab('workspace');
-        elements.promptInput.focus();
-    });
-});
-
-elements.recentList.addEventListener('click', (e) => {
-    const item = e.target.closest('.recent-item');
-    if (item) {
-        handleVersionAction(parseInt(item.dataset.index), 'view');
-    }
-});
-
-elements.adminGiveCredits.addEventListener('click', handleAdminGiveCredits);
-
-document.addEventListener('dragover', (e) => {
-    e.preventDefault();
-});
-
-document.addEventListener('drop', (e) => {
-    e.preventDefault();
-    if (e.dataTransfer.files.length > 0) {
-        handleFileUpload(e.dataTransfer.files);
-    }
-});
+        .replace(/
