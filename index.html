@@ -3,252 +3,467 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Droidgen - AI Workspace</title>
+    <title>DroidGen</title>
+    <link rel="icon" type="image/png" href="/droidgenicon.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="DroidGen">
+    <meta name="twitter:description" content="DroidGen is an AI site made by AnymousXE and Singus, developed with Nickname.">
+    <meta property="og:title" content="DroidGen">
+    <meta property="og:description" content="DroidGen is an AI site made by AnymousXE and Singus, developed with Nickname.">
+    <meta property="og:type" content="website">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <div id="app">
         <div id="auth-screen" class="screen active">
-            <div class="glass-card auth-card">
-                <div class="logo-container">
-                    <div class="logo-icon">
-                        <i class="fas fa-robot"></i>
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-logo">
+                        <img src="/droidgenicon.png" alt="DroidGen" class="logo-img">
+                        <h1>DroidGen</h1>
                     </div>
-                    <h1>Droidgen</h1>
-                    <p class="tagline">AI Workspace</p>
+                    <p class="auth-subtitle">AI-Powered Code Generation</p>
+                    <button id="google-login" class="btn-primary btn-google">
+                        <i class="fab fa-google"></i>
+                        <span>Continue with Google</span>
+                    </button>
+                    <div class="demo-badge">
+                        <i class="fas fa-gift"></i>
+                        <span>Demo: 100K free credits!</span>
+                    </div>
                 </div>
-                <button id="google-login" class="glass-btn primary">
-                    <i class="fab fa-google"></i>
-                    <span>Continue with Google</span>
-                </button>
-                <p class="demo-notice">
-                    <i class="fas fa-gift"></i>
-                    Demo: Start with 100K credits!
-                </p>
-            </div>
-            <div class="floating-orbs">
-                <div class="orb orb-1"></div>
-                <div class="orb orb-2"></div>
-                <div class="orb orb-3"></div>
+            <div class="auth-bg">
+                <div class="bg-gradient"></div>
             </div>
         </div>
 
         <div id="main-screen" class="screen">
-            <nav class="glass-nav">
-                <div class="nav-left">
-                    <div class="logo-small">
-                        <i class="fas fa-robot"></i>
-                        <span>Droidgen</span>
-                    </div>
+            <nav class="navbar">
+                <div class="nav-brand">
+                    <img src="/droidgenicon.png" alt="DroidGen" class="nav-logo">
+                    <span class="nav-title">DroidGen</span>
                 </div>
-                <div class="nav-center">
-                    <div class="nav-tabs">
-                        <button class="nav-tab active" data-tab="feed">
-                            <i class="fas fa-stream"></i>
-                            <span>Feed</span>
-                        </button>
-                        <button class="nav-tab" data-tab="workspace">
-                            <i class="fas fa-code"></i>
-                            <span>Workspace</span>
-                        </button>
-                        <button class="nav-tab" data-tab="files">
-                            <i class="fas fa-folder"></i>
-                            <span>Files</span>
-                        </button>
-                    </div>
+                <div class="nav-search" id="nav-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search projects...">
                 </div>
-                <div class="nav-right">
-                    <div class="credits-display glass-pill">
+                <div class="nav-actions">
+                    <div class="credits-badge">
                         <i class="fas fa-coins"></i>
                         <span id="credits-count">0</span>
                     </div>
-                    <button id="settings-btn" class="icon-btn">
-                        <i class="fas fa-cog"></i>
+                    <button id="create-project-btn" class="btn-primary btn-create">
+                        <i class="fas fa-plus"></i>
+                        <span>Create</span>
                     </button>
-                    <div id="user-avatar" class="avatar"></div>
-                </div>
-            </nav>
-
-            <main class="main-content">
-                <div id="feed-tab" class="tab-content active">
-                    <div class="feed-container">
-                        <div class="feed-header glass-card">
-                            <h2>Welcome back!</h2>
-                            <p>What would you like to create today?</p>
-                        </div>
-                        <div class="quick-actions">
-                            <button class="quick-action glass-card" data-prompt="Create a landing page">
-                                <i class="fas fa-globe"></i>
-                                <span>Landing Page</span>
+                    <div class="user-menu" id="user-menu">
+                        <div id="user-avatar" class="avatar"></div>
+                        <div class="user-dropdown" id="user-dropdown">
+                            <div class="dropdown-header">
+                                <div class="dropdown-avatar"></div>
+                                <div class="dropdown-info">
+                                    <span id="dropdown-name"></span>
+                                    <span id="dropdown-email"></span>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-item" id="my-projects-btn">
+                                <i class="fas fa-folder"></i>
+                                <span>My Projects</span>
                             </button>
-                            <button class="quick-action glass-card" data-prompt="Build a dashboard">
-                                <i class="fas fa-chart-line"></i>
-                                <span>Dashboard</span>
+                            <button class="dropdown-item" id="settings-btn">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
                             </button>
-                            <button class="quick-action glass-card" data-prompt="Design a mobile app">
-                                <i class="fas fa-mobile-alt"></i>
-                                <span>Mobile App</span>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-item danger" id="logout-btn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
                             </button>
-                            <button class="quick-action glass-card" data-prompt="Create an API">
-                                <i class="fas fa-server"></i>
-                                <span>API</span>
-                            </button>
-                        </div>
-                        <div class="recent-section">
-                            <h3>Recent Generations</h3>
-                            <div id="recent-list" class="recent-list"></div>
                         </div>
                     </div>
                 </div>
+            </nav>
 
-                <div id="workspace-tab" class="tab-content">
-                    <div class="workspace-container">
-                        <div class="output-area glass-card">
-                            <div id="output-content" class="output-content">
-                                <div class="empty-state">
-                                    <i class="fas fa-wand-magic-sparkles"></i>
-                                    <p>Your AI-generated content will appear here</p>
+            <div class="main-layout">
+                <aside class="sidebar" id="sidebar">
+                    <div class="sidebar-section">
+                        <button class="sidebar-item active" data-view="feed">
+                            <i class="fas fa-home"></i>
+                            <span>Feed</span>
+                        </button>
+                        <button class="sidebar-item" data-view="my-projects">
+                            <i class="fas fa-folder"></i>
+                            <span>My Projects</span>
+                        </button>
+                        <button class="sidebar-item" data-view="explore">
+                            <i class="fas fa-compass"></i>
+                            <span>Explore</span>
+                        </button>
+                    </div>
+                    <div class="sidebar-divider"></div>
+                    <div class="sidebar-section">
+                        <div class="sidebar-label">Models</div>
+                        <div class="model-list">
+                            <div class="model-item">
+                                <span class="model-name">MiMo 2 Flash</span>
+                                <span class="model-cost">300</span>
+                            </div>
+                            <div class="model-item">
+                                <span class="model-name">Devstral 2</span>
+                                <span class="model-cost">100</span>
+                            </div>
+                            <div class="model-item">
+                                <span class="model-name">GLM 4.5 Air</span>
+                                <span class="model-cost">100</span>
+                            </div>
+                            <div class="model-item">
+                                <span class="model-name">GPT OSS</span>
+                                <span class="model-cost">50</span>
+                            </div>
+                            <div class="model-item coming-soon">
+                                <span class="model-name">Momentum Max</span>
+                                <span class="model-badge">Coming Soon</span>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <main class="content" id="content">
+                    <div id="feed-view" class="view active">
+                        <div class="feed-header">
+                            <h2>Discover Projects</h2>
+                            <p>Explore what the community is building</p>
+                        </div>
+                        <div id="feed-grid" class="project-grid">
+                            <div class="empty-feed">
+                                <i class="fas fa-rocket"></i>
+                                <h3>No projects yet</h3>
+                                <p>Be the first to create something amazing!</p>
+                                <button class="btn-primary" id="empty-create-btn">
+                                    <i class="fas fa-plus"></i>
+                                    Create Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="my-projects-view" class="view">
+                        <div class="feed-header">
+                            <h2>My Projects</h2>
+                            <p>Manage your creations</p>
+                        </div>
+                        <div id="my-projects-grid" class="project-grid"></div>
+                    </div>
+
+                    <div id="explore-view" class="view">
+                        <div class="feed-header">
+                            <h2>Explore</h2>
+                            <p>Find inspiration from trending projects</p>
+                        </div>
+                        <div id="explore-grid" class="project-grid"></div>
+                    </div>
+
+                    <div id="editor-view" class="view">
+                        <div class="editor-layout">
+                            <div class="editor-sidebar">
+                                <div class="editor-sidebar-header">
+                                    <button id="back-to-feed" class="btn-icon">
+                                        <i class="fas fa-arrow-left"></i>
+                                    </button>
+                                    <span class="project-title" id="editor-project-title">Untitled</span>
+                                    <button id="project-settings-btn" class="btn-icon">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                </div>
+                                <div class="file-tree" id="file-tree">
+                                    <div class="file-tree-header">
+                                        <span>Files</span>
+                                        <button id="add-file-btn" class="btn-icon-sm">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    <div class="file-list" id="file-list"></div>
+                                </div>
+                                <div class="version-history">
+                                    <div class="version-header">
+                                        <span>Versions</span>
+                                    </div>
+                                    <div class="version-list" id="version-list"></div>
+                                </div>
+                            </div>
+                            <div class="editor-main">
+                                <div class="editor-tabs" id="editor-tabs"></div>
+                                <div class="editor-content">
+                                    <div class="code-editor" id="code-editor">
+                                        <textarea id="code-textarea" spellcheck="false"></textarea>
+                                    </div>
+                                    <div class="preview-panel" id="preview-panel">
+                                        <div class="preview-header">
+                                            <span>Preview</span>
+                                            <button id="refresh-preview" class="btn-icon-sm">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </div>
+                                        <iframe id="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+                                    </div>
+                                </div>
+                                <div class="prompt-bar" id="prompt-bar">
+                                    <div class="prompt-model">
+                                        <button id="model-selector" class="model-selector-btn">
+                                            <span id="current-model">MiMo 2 Flash</span>
+                                            <i class="fas fa-chevron-up"></i>
+                                        </button>
+                                        <div class="model-dropdown" id="model-dropdown">
+                                            <button class="model-option active" data-model="xiaomi/mimo-v2-flash:free" data-cost="300">
+                                                <div class="model-option-info">
+                                                    <span class="name">MiMo 2 Flash</span>
+                                                    <span class="desc">Fast and efficient</span>
+                                                </div>
+                                                <span class="cost">300 credits</span>
+                                            </button>
+                                            <button class="model-option" data-model="mistralai/devstral-2512:free" data-cost="100">
+                                                <div class="model-option-info">
+                                                    <span class="name">Devstral 2</span>
+                                                    <span class="desc">Code specialist</span>
+                                                </div>
+                                                <span class="cost">100 credits</span>
+                                            </button>
+                                            <button class="model-option" data-model="z-ai/glm-4.5-air:free" data-cost="100">
+                                                <div class="model-option-info">
+                                                    <span class="name">GLM 4.5 Air</span>
+                                                    <span class="desc">Balanced performance</span>
+                                                </div>
+                                                <span class="cost">100 credits</span>
+                                            </button>
+                                            <button class="model-option" data-model="openai/gpt-oss-120b:free" data-cost="50">
+                                                <div class="model-option-info">
+                                                    <span class="name">GPT OSS</span>
+                                                    <span class="desc">Budget friendly</span>
+                                                </div>
+                                                <span class="cost">50 credits</span>
+                                            </button>
+                                            <div class="model-option disabled">
+                                                <div class="model-option-info">
+                                                    <span class="name">Momentum Max</span>
+                                                    <span class="desc">Premium model</span>
+                                                </div>
+                                                <span class="badge-soon">Coming Soon</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="prompt-input-wrapper">
+                                        <textarea id="prompt-input" placeholder="Describe what you want to build or change..." rows="1"></textarea>
+                                    </div>
+                                    <button id="generate-btn" class="btn-generate" disabled>
+                                        <i class="fas fa-bolt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="editor-right-panel">
+                                <div class="panel-tabs">
+                                    <button class="panel-tab active" data-panel="comments">
+                                        <i class="fas fa-comments"></i>
+                                        <span>Comments</span>
+                                    </button>
+                                    <button class="panel-tab" data-panel="ai-chat">
+                                        <i class="fas fa-robot"></i>
+                                        <span>AI Chat</span>
+                                    </button>
+                                </div>
+                                <div class="panel-content">
+                                    <div id="comments-panel" class="panel active">
+                                        <div class="comments-list" id="comments-list"></div>
+                                        <div class="comment-input">
+                                            <textarea id="comment-input" placeholder="Add a comment..."></textarea>
+                                            <button id="post-comment" class="btn-sm">Post</button>
+                                        </div>
+                                    </div>
+                                    <div id="ai-chat-panel" class="panel">
+                                        <div class="chat-messages" id="chat-messages"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </main>
+            </div>
+        </div>
+
+        <div id="create-modal" class="modal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Create New Project</h2>
+                    <button class="modal-close"><i class="fas fa-times"></i></button>
                 </div>
-
-                <div id="files-tab" class="tab-content">
-                    <div class="files-container">
-                        <div class="files-header">
-                            <h2>Your Files</h2>
-                            <button id="upload-btn" class="glass-btn">
-                                <i class="fas fa-upload"></i>
-                                <span>Upload</span>
-                            </button>
-                            <input type="file" id="file-input" hidden multiple accept="image/*,audio/*,video/*">
-                        </div>
-                        <div id="files-grid" class="files-grid"></div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Project Name</label>
+                        <input type="text" id="new-project-name" placeholder="My Awesome Project">
                     </div>
-                </div>
-
-                <aside id="versions-sidebar" class="versions-sidebar glass-card">
-                    <div class="sidebar-header">
-                        <h3>Version History</h3>
-                        <button id="close-sidebar" class="icon-btn">
-                            <i class="fas fa-times"></i>
-                        </button>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="new-project-desc" placeholder="What are you building?"></textarea>
                     </div>
-                    <div id="versions-list" class="versions-list"></div>
-                </aside>
-
-                <button id="toggle-versions" class="toggle-versions-btn glass-btn">
-                    <i class="fas fa-history"></i>
-                </button>
-            </main>
-
-            <div class="prompt-container">
-                <div class="prompt-bar glass-card">
-                    <div class="model-selector">
-                        <button id="model-btn" class="model-btn">
-                            <span id="selected-model">MiMo 2 Flash</span>
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                        <div id="model-dropdown" class="model-dropdown glass-card">
-                            <button class="model-option active" data-model="xiaomi/mimo-v2-flash:free" data-cost="300" data-name="MiMo 2 Flash">
-                                <span class="model-name">MiMo 2 Flash</span>
-                                <span class="model-cost">300 credits</span>
-                            </button>
-                            <button class="model-option" data-model="mistralai/devstral-2512:free" data-cost="100" data-name="Devstral 2">
-                                <span class="model-name">Devstral 2</span>
-                                <span class="model-cost">100 credits</span>
-                            </button>
-                            <button class="model-option" data-model="z-ai/glm-4.5-air:free" data-cost="100" data-name="GLM 4.5 Air">
-                                <span class="model-name">GLM 4.5 Air</span>
-                                <span class="model-cost">100 credits</span>
-                            </button>
-                            <button class="model-option" data-model="openai/gpt-oss-120b:free" data-cost="50" data-name="GPT OSS">
-                                <span class="model-name">GPT OSS</span>
-                                <span class="model-cost">50 credits</span>
-                            </button>
+                    <div class="form-group">
+                        <label>Visibility</label>
+                        <div class="visibility-options">
+                            <label class="visibility-option">
+                                <input type="radio" name="visibility" value="public" checked>
+                                <div class="option-content">
+                                    <i class="fas fa-globe"></i>
+                                    <div>
+                                        <span class="option-title">Public</span>
+                                        <span class="option-desc">Visible on feed</span>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="visibility-option">
+                                <input type="radio" name="visibility" value="unlisted">
+                                <div class="option-content">
+                                    <i class="fas fa-link"></i>
+                                    <div>
+                                        <span class="option-title">Unlisted</span>
+                                        <span class="option-desc">Anyone with link</span>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="visibility-option">
+                                <input type="radio" name="visibility" value="private">
+                                <div class="option-content">
+                                    <i class="fas fa-lock"></i>
+                                    <div>
+                                        <span class="option-title">Private</span>
+                                        <span class="option-desc">Only you</span>
+                                    </div>
+                                </div>
+                            </label>
                         </div>
                     </div>
-                    <div class="input-wrapper">
-                        <div id="mentions-dropdown" class="mentions-dropdown glass-card"></div>
-                        <textarea id="prompt-input" placeholder="Describe what you want to create... Use @ to mention files" rows="1"></textarea>
-                        <div id="attached-files" class="attached-files"></div>
-                    </div>
-                    <button id="send-btn" class="send-btn" disabled>
-                        <i class="fas fa-paper-plane"></i>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary modal-cancel">Cancel</button>
+                    <button class="btn-primary" id="create-project-submit">
+                        <i class="fas fa-plus"></i>
+                        Create Project
                     </button>
                 </div>
-                <div id="loading-indicator" class="loading-indicator">
-                    <div class="loading-spinner"></div>
-                    <span>Generating...</span>
+            </div>
+        </div>
+
+        <div id="project-settings-modal" class="modal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Project Settings</h2>
+                    <button class="modal-close"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" id="project-display-name">
+                    </div>
+                    <div class="form-group">
+                        <label>URL Slug</label>
+                        <div class="input-prefix">
+                            <span>@<span id="username-preview">user</span>/</span>
+                            <input type="text" id="project-slug" placeholder="my-project">
+                        </div>
+                        <small>Leave empty for auto-generated ID</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="project-description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Visibility</label>
+                        <select id="project-visibility">
+                            <option value="public">Public</option>
+                            <option value="unlisted">Unlisted</option>
+                            <option value="private">Private</option>
+                        </select>
+                    </div>
+                    <div class="form-group danger-zone">
+                        <label>Danger Zone</label>
+                        <button class="btn-danger" id="delete-project-btn">
+                            <i class="fas fa-trash"></i>
+                            Delete Project
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary modal-cancel">Cancel</button>
+                    <button class="btn-primary" id="save-project-settings">Save Changes</button>
                 </div>
             </div>
         </div>
 
         <div id="settings-modal" class="modal">
-            <div class="modal-overlay"></div>
-            <div class="modal-content glass-card">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
                 <div class="modal-header">
                     <h2>Settings</h2>
-                    <button class="close-modal icon-btn">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <button class="modal-close"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="modal-body">
                     <div class="settings-section">
+                        <h3>Profile</h3>
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="settings-username" placeholder="username">
+                            <small>Used in project URLs: @username/project</small>
+                        </div>
+                    </div>
+                    <div class="settings-section">
                         <h3>Account</h3>
-                        <div class="user-info">
-                            <div id="settings-avatar" class="avatar large"></div>
-                            <div class="user-details">
-                                <p id="settings-email" class="user-email"></p>
-                                <p id="settings-credits" class="user-credits"></p>
+                        <div class="account-info">
+                            <div class="info-row">
+                                <span>Email</span>
+                                <span id="settings-email-display"></span>
+                            </div>
+                            <div class="info-row">
+                                <span>Credits</span>
+                                <span id="settings-credits-display"></span>
                             </div>
                         </div>
                     </div>
-                    <div class="settings-actions">
-                        <button id="change-email-btn" class="glass-btn">
-                            <i class="fas fa-envelope"></i>
-                            <span>Update Email</span>
-                        </button>
-                        <button id="logout-btn" class="glass-btn danger">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Logout</span>
-                        </button>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary modal-cancel">Cancel</button>
+                    <button class="btn-primary" id="save-settings">Save</button>
                 </div>
             </div>
         </div>
 
-        <div id="admin-modal" class="modal">
-            <div class="modal-overlay"></div>
-            <div class="modal-content glass-card admin-panel">
+        <div id="add-file-modal" class="modal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content modal-sm">
                 <div class="modal-header">
-                    <h2><i class="fas fa-shield-alt"></i> Admin Panel</h2>
-                    <button class="close-modal icon-btn">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <h2>Add File</h2>
+                    <button class="modal-close"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="modal-body">
-                    <div class="admin-section">
-                        <h3>Give Credits</h3>
-                        <div class="admin-form">
-                            <input type="email" id="admin-email-input" placeholder="User email" class="glass-input">
-                            <input type="number" id="admin-credits-input" placeholder="Credits amount" class="glass-input">
-                            <button id="admin-give-credits" class="glass-btn primary">
-                                <i class="fas fa-coins"></i>
-                                <span>Give Credits</span>
-                            </button>
-                        </div>
+                    <div class="form-group">
+                        <label>Filename</label>
+                        <input type="text" id="new-filename" placeholder="script.js">
                     </div>
-                    <div id="admin-result" class="admin-result"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary modal-cancel">Cancel</button>
+                    <button class="btn-primary" id="add-file-submit">Add File</button>
                 </div>
             </div>
         </div>
 
-        <div id="toast-container" class="toast-container"></div>
+        <div id="toast-container"></div>
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="loading-spinner"></div>
+            <span>Generating...</span>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
