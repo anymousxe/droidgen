@@ -4,16 +4,1294 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DroidGen</title>
-    <link rel="icon" type="image/png" href="/droidgenicon.png">
+    <link rel="icon" type="image/png" href="https://via.placeholder.com/64/10b981/ffffff?text=D">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="DroidGen">
     <meta name="twitter:description" content="DroidGen is an AI site made by AnymousXE and Singus, developed with Nickname.">
     <meta property="og:title" content="DroidGen">
     <meta property="og:description" content="DroidGen is an AI site made by AnymousXE and Singus, developed with Nickname.">
     <meta property="og:type" content="website">
-    <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-0: #09090b;
+            --bg-1: #0f0f12;
+            --bg-2: #16161a;
+            --bg-3: #1e1e24;
+            --bg-4: #27272f;
+            --border: #2e2e38;
+            --border-light: #3e3e4a;
+            --text: #fafafa;
+            --text-2: #a1a1aa;
+            --text-3: #71717a;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --accent-soft: rgba(16, 185, 129, 0.15);
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --radius: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.4);
+            --transition: 0.15s ease;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-0);
+            color: var(--text);
+            line-height: 1.5;
+            overflow: hidden;
+        }
+        #app { height: 100%; }
+        .screen { position: fixed; inset: 0; display: none; }
+        .screen.active { display: flex; }
+        #auth-screen {
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-0);
+        }
+        .auth-bg {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .bg-gradient {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 30% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+        }
+        .auth-card {
+            position: relative;
+            z-index: 10;
+            background: var(--bg-1);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 48px;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            margin: 20px;
+            box-shadow: var(--shadow);
+        }
+        .auth-logo { margin-bottom: 8px; }
+        .logo-img {
+            width: 72px;
+            height: 72px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 16px;
+        }
+        .auth-logo h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .auth-subtitle {
+            color: var(--text-2);
+            margin-bottom: 32px;
+            font-size: 15px;
+        }
+        .btn-google {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px 24px;
+            background: #fff;
+            color: #333;
+            border: none;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-google:hover {
+            background: #f5f5f5;
+            transform: translateY(-1px);
+        }
+        .btn-google:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
+        .demo-badge {
+            margin-top: 24px;
+            padding: 12px 16px;
+            background: var(--accent-soft);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: var(--radius);
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        #main-screen { flex-direction: column; }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding-bottom: 80px;
+        }
+        .feed-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+        .feed-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .feed-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .feed-header p {
+            color: var(--text-2);
+            font-size: 16px;
+        }
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .project-card {
+            background: var(--bg-1);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .project-card:hover {
+            border-color: var(--border-light);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+        }
+        .project-preview {
+            height: 160px;
+            background: var(--bg-2);
+            position: relative;
+            overflow: hidden;
+        }
+        .project-preview iframe {
+            width: 200%;
+            height: 200%;
+            transform: scale(0.5);
+            transform-origin: top left;
+            border: none;
+            pointer-events: none;
+        }
+        .preview-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-3);
+            font-size: 32px;
+        }
+        .project-info { padding: 16px; }
+        .project-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .project-title {
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .project-desc {
+            font-size: 14px;
+            color: var(--text-2);
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .project-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-3);
+        }
+        .project-author {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .project-author img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--bg-3);
+        }
+        .project-stats {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .stat i { font-size: 12px; }
+        .like-btn {
+            background: none;
+            border: none;
+            color: var(--text-3);
+            cursor: pointer;
+            padding: 4px;
+            transition: var(--transition);
+        }
+        .like-btn:hover, .like-btn.liked {
+            color: var(--danger);
+        }
+        .empty-feed {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 20px;
+        }
+        .empty-feed i {
+            font-size: 64px;
+            color: var(--text-3);
+            margin-bottom: 24px;
+        }
+        .empty-feed h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        .empty-feed p {
+            color: var(--text-2);
+            margin-bottom: 32px;
+        }
+        .taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(50px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 1000;
+        }
+        .taskbar:hover, .taskbar.visible {
+            transform: translateX(-50%) translateY(-20px);
+        }
+        .taskbar-btn {
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            color: var(--text-2);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+        .taskbar-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            transform: scale(1.15) rotate(8deg);
+        }
+        .taskbar-btn.active {
+            background: var(--accent-soft);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        .taskbar-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+        .taskbar-divider {
+            width: 1px;
+            height: 32px;
+            background: var(--border);
+            margin: 0 8px;
+        }
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px 8px 8px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .user-pill:hover {
+            border-color: var(--accent);
+        }
+        .user-pill img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--bg-3);
+        }
+        .user-pill-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .user-pill-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .user-pill-credits {
+            font-size: 11px;
+            color: var(--warning);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        #create-screen {
+            background: var(--bg-0);
+            flex-direction: column;
+        }
+        .create-canvas {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .canvas-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
+        }
+        .scrolling-examples {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            pointer-events: none;
+        }
+        .example-text {
+            font-size: 24px;
+            font-weight: 300;
+            color: var(--text-3);
+            opacity: 0;
+            animation: fadeInOut 8s ease-in-out infinite;
+        }
+        .example-text:nth-child(1) { animation-delay: 0s; }
+        .example-text:nth-child(2) { animation-delay: 2s; }
+        .example-text:nth-child(3) { animation-delay: 4s; }
+        .example-text:nth-child(4) { animation-delay: 6s; }
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translateY(20px); }
+            25%, 75% { opacity: 0.6; transform: translateY(0); }
+        }
+        .create-prompt-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 700px;
+            padding: 0 24px;
+        }
+        .create-prompt-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--glass-shadow);
+        }
+        .model-selector-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .model-selector {
+            position: relative;
+            flex: 1;
+        }
+        .model-selector-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .model-selector-btn:hover {
+            border-color: var(--border-light);
+        }
+        .model-selector-btn i {
+            font-size: 12px;
+            transition: transform var(--transition);
+        }
+        .model-selector.open .model-selector-btn i {
+            transform: rotate(180deg);
+        }
+        .model-dropdown {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px);
+            transition: var(--transition);
+            z-index: 100;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .model-selector.open .model-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .model-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: inherit;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: left;
+        }
+        .model-option:hover { background: var(--bg-3); }
+        .model-option.active { background: var(--accent-soft); }
+        .model-option-info { display: flex; flex-direction: column; gap: 2px; }
+        .model-option-info .name { font-size: 14px; font-weight: 500; }
+        .model-option-info .desc { font-size: 11px; color: var(--text-3); }
+        .model-option .cost { font-size: 12px; color: var(--warning); }
+        .model-option .limit { font-size: 10px; color: var(--text-3); }
+        .thinking-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-2);
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .thinking-toggle.active {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .thinking-toggle i { font-size: 14px; }
+        .prompt-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 16px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 15px;
+            resize: none;
+            outline: none;
+            transition: var(--transition);
+        }
+        .prompt-textarea:focus {
+            border-color: var(--accent);
+        }
+        .prompt-textarea::placeholder {
+            color: var(--text-3);
+        }
+        .prompt-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 16px;
+        }
+        .prompt-info {
+            font-size: 13px;
+            color: var(--text-3);
+        }
+        .btn-generate {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-generate:hover:not(:disabled) {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+        .btn-generate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .back-btn {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-2);
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 10;
+        }
+        .back-btn:hover {
+            background: var(--bg-3);
+            color: var(--text);
+        }
+        #editor-screen {
+            flex-direction: column;
+            background: var(--bg-0);
+        }
+        .editor-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: var(--bg-1);
+            border-bottom: 1px solid var(--border);
+        }
+        .editor-header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .editor-back {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-2);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .editor-back:hover {
+            background: var(--bg-3);
+            color: var(--text);
+        }
+        .editor-project-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .editor-header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .editor-layout {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        .editor-sidebar {
+            width: 240px;
+            background: var(--bg-1);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+        .file-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+        .file-tree-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-3);
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: var(--radius);
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-2);
+        }
+        .file-item:hover {
+            background: var(--bg-2);
+            color: var(--text);
+        }
+        .file-item.active {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+        .file-item i { font-size: 14px; width: 16px; }
+        .file-item .fname { flex: 1; }
+        .file-item .del-btn {
+            opacity: 0;
+            background: none;
+            border: none;
+            color: var(--text-3);
+            cursor: pointer;
+            padding: 2px;
+            font-size: 11px;
+        }
+        .file-item:hover .del-btn { opacity: 1; }
+        .file-item .del-btn:hover { color: var(--danger); }
+        .editor-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .editor-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        .code-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        #code-textarea {
+            flex: 1;
+            width: 100%;
+            padding: 20px;
+            background: var(--bg-0);
+            border: none;
+            color: var(--text);
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.7;
+            resize: none;
+            outline: none;
+            tab-size: 2;
+        }
+        .preview-panel {
+            width: 50%;
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        .preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: var(--bg-1);
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-3);
+        }
+        .preview-header button {
+            background: none;
+            border: none;
+            color: var(--text-3);
+            cursor: pointer;
+            padding: 4px;
+        }
+        .preview-header button:hover { color: var(--text); }
+        #preview-frame {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background: white;
+        }
+        .editor-prompt-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: var(--bg-1);
+            border-top: 1px solid var(--border);
+        }
+        .editor-prompt-bar .model-selector {
+            width: 200px;
+        }
+        .editor-prompt-bar .prompt-input-wrap {
+            flex: 1;
+        }
+        .editor-prompt-bar input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+        .editor-prompt-bar input:focus {
+            border-color: var(--accent);
+        }
+        .editor-prompt-bar .btn-generate {
+            padding: 12px 20px;
+        }
+        #settings-screen {
+            flex-direction: column;
+            background: var(--bg-0);
+        }
+        .settings-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 24px;
+        }
+        .settings-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .settings-header {
+            margin-bottom: 32px;
+        }
+        .settings-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .settings-section {
+            background: var(--bg-1);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .settings-section h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-2);
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent);
+        }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        .form-group small { display: block; margin-top: 6px; font-size: 12px; color: var(--text-3); }
+        .avatar-upload {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--bg-3);
+            background-size: cover;
+            background-position: center;
+            border: 2px solid var(--border);
+        }
+        .avatar-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--bg-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-secondary:hover {
+            background: var(--bg-3);
+            border-color: var(--border-light);
+        }
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-danger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-row .label { color: var(--text-3); }
+        #profile-screen {
+            flex-direction: column;
+            background: var(--bg-0);
+        }
+        .profile-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 24px;
+        }
+        .profile-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--border);
+        }
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--bg-3);
+            background-size: cover;
+            background-position: center;
+            border: 3px solid var(--border);
+        }
+        .profile-info h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .profile-username {
+            color: var(--text-3);
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        .profile-stats {
+            display: flex;
+            gap: 24px;
+        }
+        .profile-stat {
+            text-align: center;
+        }
+        .profile-stat .num {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .profile-stat .label {
+            font-size: 13px;
+            color: var(--text-3);
+        }
+        .follow-btn {
+            margin-left: auto;
+        }
+        .profile-projects h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        #username-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+        #username-modal.open {
+            display: flex;
+        }
+        .modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
+        }
+        .modal-box {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            background: var(--bg-1);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            animation: modalIn 0.2s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(-16px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .modal-header p {
+            font-size: 14px;
+            color: var(--text-2);
+            margin-top: 4px;
+        }
+        .modal-body {
+            padding: 24px;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+        }
+        .username-input-wrap {
+            display: flex;
+            align-items: center;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .username-input-wrap .prefix {
+            padding: 12px 16px;
+            background: var(--bg-3);
+            border-right: 1px solid var(--border);
+            color: var(--text-3);
+            font-size: 14px;
+        }
+        .username-input-wrap input {
+            flex: 1;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+        .username-status {
+            margin-top: 8px;
+            font-size: 13px;
+        }
+        .username-status.available {
+            color: var(--accent);
+        }
+        .username-status.taken {
+            color: var(--danger);
+        }
+        .user-dropdown {
+            position: absolute;
+            bottom: calc(100% + 12px);
+            right: 0;
+            width: 260px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px);
+            transition: var(--transition);
+            z-index: 1001;
+        }
+        .user-dropdown.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .dropdown-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .dropdown-header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-3);
+        }
+        .dropdown-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .dropdown-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .dropdown-email {
+            font-size: 12px;
+            color: var(--text-3);
+        }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            color: var(--text-2);
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: left;
+        }
+        .dropdown-item:hover {
+            background: var(--bg-3);
+            color: var(--text);
+        }
+        .dropdown-item.danger {
+            color: var(--danger);
+        }
+        .dropdown-item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 0;
+        }
+        #toast-container {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 3000;
+        }
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 20px;
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            font-size: 14px;
+            animation: toastIn 0.25s ease;
+        }
+        .toast.success { border-color: var(--accent); }
+        .toast.success i { color: var(--accent); }
+        .toast.error { border-color: var(--danger); }
+        .toast.error i { color: var(--danger); }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            z-index: 3000;
+        }
+        .loading-overlay.active {
+            display: flex;
+        }
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-overlay span {
+            font-size: 16px;
+            color: var(--text-2);
+        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+        @media (max-width: 768px) {
+            .taskbar {
+                padding: 10px 16px;
+            }
+            .taskbar-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+            }
+            .user-pill-info {
+                display: none;
+            }
+            .project-grid {
+                grid-template-columns: 1fr;
+            }
+            .editor-sidebar {
+                display: none;
+            }
+            .preview-panel {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
     <div id="app">
@@ -21,12 +1299,17 @@
             <div class="auth-container">
                 <div class="auth-card">
                     <div class="auth-logo">
-                        <img src="/droidgenicon.png" alt="DroidGen" class="logo-img">
+                        <img src="https://via.placeholder.com/72/10b981/ffffff?text=D" alt="DroidGen" class="logo-img">
                         <h1>DroidGen</h1>
                     </div>
                     <p class="auth-subtitle">AI-Powered Code Generation</p>
-                    <button id="google-login" class="btn-primary btn-google">
-                        <i class="fab fa-google"></i>
+                    <button id="google-login" class="btn-google">
+                        <svg class="google-icon" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
                         <span>Continue with Google</span>
                     </button>
                     <div class="demo-badge">
@@ -40,354 +1323,394 @@
         </div>
 
         <div id="main-screen" class="screen">
-            <nav class="navbar">
-                <div class="nav-brand">
-                    <img src="/droidgenicon.png" alt="DroidGen" class="nav-logo">
-                    <span class="nav-title">DroidGen</span>
+            <div class="main-content">
+                <div class="feed-container" id="feed-container">
+                    <div class="feed-header">
+                        <h1>🔥 Hot Projects</h1>
+                        <p>Discover what the community is building</p>
+                    </div>
+                    <div id="feed-grid" class="project-grid">
+                        <div class="empty-feed">
+                            <i class="fas fa-rocket"></i>
+                            <h3>No projects yet</h3>
+                            <p>Be the first to create something amazing!</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="nav-search" id="nav-search">
+            </div>
+            <div class="taskbar" id="taskbar">
+                <button class="taskbar-btn active" data-screen="feed" title="Home">
+                    <i class="fas fa-home"></i>
+                </button>
+                <button class="taskbar-btn" data-screen="create" title="Create">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="taskbar-btn" data-screen="search" title="Search">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="search-input" placeholder="Search projects...">
-                </div>
-                <div class="nav-actions">
-                    <div class="credits-badge">
-                        <i class="fas fa-coins"></i>
-                        <span id="credits-count">0</span>
+                </button>
+                <div class="taskbar-divider"></div>
+                <button class="taskbar-btn" data-screen="settings" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <div class="user-pill" id="user-pill">
+                    <img id="user-avatar" src="https://via.placeholder.com/36/27272f/71717a?text=?" alt="Avatar">
+                    <div class="user-pill-info">
+                        <span class="user-pill-name" id="user-name">User</span>
+                        <span class="user-pill-credits"><i class="fas fa-coins"></i> <span id="credits-count">0</span></span>
                     </div>
-                    <button id="create-project-btn" class="btn-primary btn-create">
-                        <i class="fas fa-plus"></i>
-                        <span>Create</span>
+                </div>
+                <div class="user-dropdown" id="user-dropdown">
+                    <div class="dropdown-header">
+                        <img id="dropdown-avatar" src="https://via.placeholder.com/40/27272f/71717a?text=?" alt="Avatar">
+                        <div class="dropdown-info">
+                            <span class="dropdown-name" id="dropdown-name">User</span>
+                            <span class="dropdown-email" id="dropdown-email">user@email.com</span>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" id="my-profile-btn">
+                        <i class="fas fa-user"></i>
+                        <span>My Profile</span>
                     </button>
-                    <div class="user-menu" id="user-menu">
-                        <div id="user-avatar" class="avatar"></div>
-                        <div class="user-dropdown" id="user-dropdown">
-                            <div class="dropdown-header">
-                                <div class="dropdown-avatar"></div>
-                                <div class="dropdown-info">
-                                    <span id="dropdown-name"></span>
-                                    <span id="dropdown-email"></span>
-                                </div>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <button class="dropdown-item" id="my-projects-btn">
-                                <i class="fas fa-folder"></i>
-                                <span>My Projects</span>
-                            </button>
-                            <button class="dropdown-item" id="settings-btn">
-                                <i class="fas fa-cog"></i>
-                                <span>Settings</span>
-                            </button>
-                            <div class="dropdown-divider"></div>
-                            <button class="dropdown-item danger" id="logout-btn">
-                                <i class="fas fa-sign-out-alt"></i>
-                                <span>Logout</span>
-                            </button>
-                        </div>
-                    </div>
+                    <button class="dropdown-item" id="my-projects-btn">
+                        <i class="fas fa-folder"></i>
+                        <span>My Projects</span>
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item danger" id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
                 </div>
-            </nav>
-
-            <div class="main-layout">
-                <aside class="sidebar" id="sidebar">
-                    <div class="sidebar-section">
-                        <button class="sidebar-item active" data-view="feed">
-                            <i class="fas fa-home"></i>
-                            <span>Feed</span>
-                        </button>
-                        <button class="sidebar-item" data-view="my-projects">
-                            <i class="fas fa-folder"></i>
-                            <span>My Projects</span>
-                        </button>
-                        <button class="sidebar-item" data-view="explore">
-                            <i class="fas fa-compass"></i>
-                            <span>Explore</span>
-                        </button>
-                    </div>
-                    <div class="sidebar-divider"></div>
-                    <div class="sidebar-section">
-                        <div class="sidebar-label">Models</div>
-                        <div class="model-list">
-                            <div class="model-item">
-                                <span class="model-name">MiMo 2 Flash</span>
-                                <span class="model-cost">300</span>
-                            </div>
-                            <div class="model-item">
-                                <span class="model-name">Devstral 2</span>
-                                <span class="model-cost">100</span>
-                            </div>
-                            <div class="model-item">
-                                <span class="model-name">GLM 4.5 Air</span>
-                                <span class="model-cost">100</span>
-                            </div>
-                            <div class="model-item">
-                                <span class="model-name">GPT OSS</span>
-                                <span class="model-cost">50</span>
-                            </div>
-                            <div class="model-item coming-soon">
-                                <span class="model-name">Momentum Max</span>
-                                <span class="model-badge">Coming Soon</span>
-                            </div>
-                        </div>
-                    </div>
-                </aside>
-
-                <main class="content" id="content">
-                    <div id="feed-view" class="view active">
-                        <div class="feed-header">
-                            <h2>Discover Projects</h2>
-                            <p>Explore what the community is building</p>
-                        </div>
-                        <div id="feed-grid" class="project-grid">
-                            <div class="empty-feed">
-                                <i class="fas fa-rocket"></i>
-                                <h3>No projects yet</h3>
-                                <p>Be the first to create something amazing!</p>
-                                <button class="btn-primary" id="empty-create-btn">
-                                    <i class="fas fa-plus"></i>
-                                    Create Project
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="my-projects-view" class="view">
-                        <div class="feed-header">
-                            <h2>My Projects</h2>
-                            <p>Manage your creations</p>
-                        </div>
-                        <div id="my-projects-grid" class="project-grid"></div>
-                    </div>
-
-                    <div id="explore-view" class="view">
-                        <div class="feed-header">
-                            <h2>Explore</h2>
-                            <p>Find inspiration from trending projects</p>
-                        </div>
-                        <div id="explore-grid" class="project-grid"></div>
-                    </div>
-
-                    <div id="editor-view" class="view">
-                        <div class="editor-layout">
-                            <div class="editor-sidebar">
-                                <div class="editor-sidebar-header">
-                                    <button id="back-to-feed" class="btn-icon">
-                                        <i class="fas fa-arrow-left"></i>
-                                    </button>
-                                    <span class="project-title" id="editor-project-title">Untitled</span>
-                                    <button id="project-settings-btn" class="btn-icon">
-                                        <i class="fas fa-cog"></i>
-                                    </button>
-                                </div>
-                                <div class="file-tree" id="file-tree">
-                                    <div class="file-tree-header">
-                                        <span>Files</span>
-                                        <button id="add-file-btn" class="btn-icon-sm">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-                                    <div class="file-list" id="file-list"></div>
-                                </div>
-                                <div class="version-history">
-                                    <div class="version-header">
-                                        <span>Versions</span>
-                                    </div>
-                                    <div class="version-list" id="version-list"></div>
-                                </div>
-                            </div>
-                            <div class="editor-main">
-                                <div class="editor-tabs" id="editor-tabs"></div>
-                                <div class="editor-content">
-                                    <div class="code-editor" id="code-editor">
-                                        <textarea id="code-textarea" spellcheck="false"></textarea>
-                                    </div>
-                                    <div class="preview-panel" id="preview-panel">
-                                        <div class="preview-header">
-                                            <span>Preview</span>
-                                            <button id="refresh-preview" class="btn-icon-sm">
-                                                <i class="fas fa-sync-alt"></i>
-                                            </button>
-                                        </div>
-                                        <iframe id="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
-                                    </div>
-                                </div>
-                                <div class="prompt-bar" id="prompt-bar">
-                                    <div class="prompt-model">
-                                        <button id="model-selector" class="model-selector-btn">
-                                            <span id="current-model">MiMo 2 Flash</span>
-                                            <i class="fas fa-chevron-up"></i>
-                                        </button>
-                                        <div class="model-dropdown" id="model-dropdown">
-                                            <button class="model-option active" data-model="xiaomi/mimo-v2-flash:free" data-cost="300">
-                                                <div class="model-option-info">
-                                                    <span class="name">MiMo 2 Flash</span>
-                                                    <span class="desc">Fast and efficient</span>
-                                                </div>
-                                                <span class="cost">300 credits</span>
-                                            </button>
-                                            <button class="model-option" data-model="mistralai/devstral-2512:free" data-cost="100">
-                                                <div class="model-option-info">
-                                                    <span class="name">Devstral 2</span>
-                                                    <span class="desc">Code specialist</span>
-                                                </div>
-                                                <span class="cost">100 credits</span>
-                                            </button>
-                                            <button class="model-option" data-model="z-ai/glm-4.5-air:free" data-cost="100">
-                                                <div class="model-option-info">
-                                                    <span class="name">GLM 4.5 Air</span>
-                                                    <span class="desc">Balanced performance</span>
-                                                </div>
-                                                <span class="cost">100 credits</span>
-                                            </button>
-                                            <button class="model-option" data-model="openai/gpt-oss-120b:free" data-cost="50">
-                                                <div class="model-option-info">
-                                                    <span class="name">GPT OSS</span>
-                                                    <span class="desc">Budget friendly</span>
-                                                </div>
-                                                <span class="cost">50 credits</span>
-                                            </button>
-                                            <div class="model-option disabled">
-                                                <div class="model-option-info">
-                                                    <span class="name">Momentum Max</span>
-                                                    <span class="desc">Premium model</span>
-                                                </div>
-                                                <span class="badge-soon">Coming Soon</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="prompt-input-wrapper">
-                                        <textarea id="prompt-input" placeholder="Describe what you want to build or change..." rows="1"></textarea>
-                                    </div>
-                                    <button id="generate-btn" class="btn-generate" disabled>
-                                        <i class="fas fa-bolt"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="editor-right-panel">
-                                <div class="panel-tabs">
-                                    <button class="panel-tab active" data-panel="comments">
-                                        <i class="fas fa-comments"></i>
-                                        <span>Comments</span>
-                                    </button>
-                                    <button class="panel-tab" data-panel="ai-chat">
-                                        <i class="fas fa-robot"></i>
-                                        <span>AI Chat</span>
-                                    </button>
-                                </div>
-                                <div class="panel-content">
-                                    <div id="comments-panel" class="panel active">
-                                        <div class="comments-list" id="comments-list"></div>
-                                        <div class="comment-input">
-                                            <textarea id="comment-input" placeholder="Add a comment..."></textarea>
-                                            <button id="post-comment" class="btn-sm">Post</button>
-                                        </div>
-                                    </div>
-                                    <div id="ai-chat-panel" class="panel">
-                                        <div class="chat-messages" id="chat-messages"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </main>
             </div>
         </div>
 
-        <div id="create-modal" class="modal">
-            <div class="modal-backdrop"></div>
-            <div class="modal-content">
+        <div id="create-screen" class="screen">
+            <button class="back-btn" id="create-back">
+                <i class="fas fa-arrow-left"></i>
+                Back
+            </button>
+            <div class="create-canvas">
+                <div class="canvas-bg"></div>
+                <div class="scrolling-examples">
+                    <span class="example-text">"make me snake"</span>
+                    <span class="example-text">"build a todo app"</span>
+                    <span class="example-text">"create a landing page"</span>
+                    <span class="example-text">"design a calculator"</span>
+                </div>
+                <div class="create-prompt-container">
+                    <div class="create-prompt-box">
+                        <div class="model-selector-row">
+                            <div class="model-selector" id="create-model-selector">
+                                <button class="model-selector-btn">
+                                    <span id="create-model-name">LFM 2.5 Base</span>
+                                    <i class="fas fa-chevron-up"></i>
+                                </button>
+                                <div class="model-dropdown">
+                                    <button class="model-option" data-model="liquid/lfm-2.5-1.2b-instruct:free" data-cost="100" data-thinking="false">
+                                        <div class="model-option-info">
+                                            <span class="name">LFM 2.5 Base</span>
+                                            <span class="desc">Fast and efficient</span>
+                                        </div>
+                                        <span class="cost">100 credits</span>
+                                    </button>
+                                    <button class="model-option" data-model="liquid/lfm-2.5-1.2b-thinking:free" data-cost="200" data-thinking="true">
+                                        <div class="model-option-info">
+                                            <span class="name">LFM 2.5 Thinking</span>
+                                            <span class="desc">Enhanced reasoning</span>
+                                        </div>
+                                        <span class="cost">200 credits</span>
+                                    </button>
+                                    <button class="model-option" data-model="z-ai/glm-4.5-air:free" data-cost="300">
+                                        <div class="model-option-info">
+                                            <span class="name">GLM 4.5 Air</span>
+                                            <span class="desc">Balanced performance</span>
+                                        </div>
+                                        <span class="cost">300 credits</span>
+                                    </button>
+                                    <button class="model-option" data-model="moonshotai/kimi-k2:free" data-cost="100">
+                                        <div class="model-option-info">
+                                            <span class="name">Kimi K2</span>
+                                            <span class="desc">Creative coding</span>
+                                        </div>
+                                        <span class="cost">100 credits</span>
+                                    </button>
+                                    <button class="model-option" data-model="google/gemma-3-27b-it:free" data-cost="50">
+                                        <div class="model-option-info">
+                                            <span class="name">Gemma 3</span>
+                                            <span class="desc">Budget friendly</span>
+                                        </div>
+                                        <span class="cost">50 credits</span>
+                                    </button>
+                                    <button class="model-option" data-model="z-ai/glm-4.7-flash" data-cost="800">
+                                        <div class="model-option-info">
+                                            <span class="name">GLM 4.7 Flash</span>
+                                            <span class="desc">Premium - 5 req/min global</span>
+                                        </div>
+                                        <div>
+                                            <span class="cost">800 credits</span>
+                                            <span class="limit">Rate limited</span>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                            <button class="thinking-toggle" id="thinking-toggle" style="display: none;">
+                                <i class="fas fa-brain"></i>
+                                <span>Thinking</span>
+                            </button>
+                        </div>
+                        <textarea class="prompt-textarea" id="create-prompt" placeholder="Describe what you want to build..."></textarea>
+                        <div class="prompt-actions">
+                            <span class="prompt-info">Cost: <span id="create-cost">100</span> credits</span>
+                            <button class="btn-generate" id="create-generate" disabled>
+                                <i class="fas fa-bolt"></i>
+                                Generate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="editor-screen" class="screen">
+            <div class="editor-header">
+                <div class="editor-header-left">
+                    <button class="editor-back" id="editor-back">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <span class="editor-project-name" id="editor-project-name">Untitled Project</span>
+                </div>
+                <div class="editor-header-right">
+                    <button class="btn-secondary" id="project-settings-btn">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </button>
+                    <button class="btn-primary" id="save-project-btn">
+                        <i class="fas fa-save"></i>
+                        Save
+                    </button>
+                </div>
+            </div>
+            <div class="editor-layout">
+                <div class="editor-sidebar">
+                    <div class="file-tree">
+                        <div class="file-tree-header">
+                            <span>Files</span>
+                            <button class="btn-secondary" id="add-file-btn" style="padding: 4px 8px; font-size: 11px;">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div id="file-list"></div>
+                    </div>
+                </div>
+                <div class="editor-main">
+                    <div class="editor-content">
+                        <div class="code-panel">
+                            <textarea id="code-textarea" spellcheck="false" placeholder="// Your code will appear here..."></textarea>
+                        </div>
+                        <div class="preview-panel">
+                            <div class="preview-header">
+                                <span>Preview</span>
+                                <button id="refresh-preview"><i class="fas fa-sync-alt"></i></button>
+                            </div>
+                            <iframe id="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+                        </div>
+                    </div>
+                    <div class="editor-prompt-bar">
+                        <div class="model-selector" id="editor-model-selector">
+                            <button class="model-selector-btn">
+                                <span id="editor-model-name">LFM 2.5 Base</span>
+                                <i class="fas fa-chevron-up"></i>
+                            </button>
+                            <div class="model-dropdown">
+                                <button class="model-option active" data-model="liquid/lfm-2.5-1.2b-instruct:free" data-cost="100">
+                                    <div class="model-option-info">
+                                        <span class="name">LFM 2.5 Base</span>
+                                        <span class="desc">Fast and efficient</span>
+                                    </div>
+                                    <span class="cost">100 credits</span>
+                                </button>
+                                <button class="model-option" data-model="liquid/lfm-2.5-1.2b-thinking:free" data-cost="200">
+                                    <div class="model-option-info">
+                                        <span class="name">LFM 2.5 Thinking</span>
+                                        <span class="desc">Enhanced reasoning</span>
+                                    </div>
+                                    <span class="cost">200 credits</span>
+                                </button>
+                                <button class="model-option" data-model="z-ai/glm-4.5-air:free" data-cost="300">
+                                    <div class="model-option-info">
+                                        <span class="name">GLM 4.5 Air</span>
+                                        <span class="desc">Balanced performance</span>
+                                    </div>
+                                    <span class="cost">300 credits</span>
+                                </button>
+                                <button class="model-option" data-model="moonshotai/kimi-k2:free" data-cost="100">
+                                    <div class="model-option-info">
+                                        <span class="name">Kimi K2</span>
+                        <span class="desc">Creative coding</span>
+                                    </div>
+                                    <span class="cost">100 credits</span>
+                                </button>
+                                <button class="model-option" data-model="google/gemma-3-27b-it:free" data-cost="50">
+                                    <div class="model-option-info">
+                                        <span class="name">Gemma 3</span>
+                                        <span class="desc">Budget friendly</span>
+                                    </div>
+                                    <span class="cost">50 credits</span>
+                                </button>
+                                <button class="model-option" data-model="z-ai/glm-4.7-flash" data-cost="800">
+                                    <div class="model-option-info">
+                                        <span class="name">GLM 4.7 Flash</span>
+                                        <span class="desc">Premium</span>
+                                    </div>
+                                    <span class="cost">800 credits</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="prompt-input-wrap">
+                            <input type="text" id="editor-prompt" placeholder="Describe changes you want to make...">
+                        </div>
+                        <button class="btn-generate" id="editor-generate" disabled>
+                            <i class="fas fa-bolt"></i>
+                            Generate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings-screen" class="screen">
+            <button class="back-btn" id="settings-back">
+                <i class="fas fa-arrow-left"></i>
+                Back
+            </button>
+            <div class="settings-container">
+                <div class="settings-content">
+                    <div class="settings-header">
+                        <h1>Settings</h1>
+                    </div>
+                    <div class="settings-section">
+                        <h2>Profile</h2>
+                        <div class="form-group">
+                            <label>Profile Picture</label>
+                            <div class="avatar-upload">
+                                <div class="avatar-preview" id="settings-avatar"></div>
+                                <div class="avatar-actions">
+                                    <input type="file" id="avatar-input" accept="image/*" style="display: none;">
+                                    <button class="btn-secondary" id="change-avatar-btn">
+                                        <i class="fas fa-camera"></i>
+                                        Change Photo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="settings-username" placeholder="username">
+                            <small>Used in project URLs: @username/project (1 min cooldown between changes)</small>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h2>Account</h2>
+                        <div class="info-row">
+                            <span class="label">Email</span>
+                            <span id="settings-email">user@email.com</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Credits</span>
+                            <span id="settings-credits">0</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Member Since</span>
+                            <span id="settings-joined">-</span>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h2>Actions</h2>
+                        <button class="btn-primary" id="save-settings-btn">
+                            <i class="fas fa-save"></i>
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="profile-screen" class="screen">
+            <button class="back-btn" id="profile-back">
+                <i class="fas fa-arrow-left"></i>
+                Back
+            </button>
+            <div class="profile-container">
+                <div class="profile-content">
+                    <div class="profile-header">
+                        <div class="profile-avatar" id="profile-avatar"></div>
+                        <div class="profile-info">
+                            <h1 id="profile-display-name">User</h1>
+                            <p class="profile-username" id="profile-username">@username</p>
+                            <div class="profile-stats">
+                                <div class="profile-stat">
+                                    <span class="num" id="profile-projects-count">0</span>
+                                    <span class="label">Projects</span>
+                                </div>
+                                <div class="profile-stat">
+                                    <span class="num" id="profile-followers-count">0</span>
+                                    <span class="label">Followers</span>
+                                </div>
+                                <div class="profile-stat">
+                                    <span class="num" id="profile-likes-count">0</span>
+                                    <span class="label">Likes</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-primary follow-btn" id="follow-btn" style="display: none;">
+                            <i class="fas fa-user-plus"></i>
+                            Follow
+                        </button>
+                    </div>
+                    <div class="profile-projects">
+                        <h2>Public Projects</h2>
+                        <div id="profile-projects-grid" class="project-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="project-settings-modal" class="screen" style="background: rgba(0,0,0,0.85); backdrop-filter: blur(4px);">
+            <div class="modal-box" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 500px; width: calc(100% - 40px);">
                 <div class="modal-header">
-                    <h2>Create New Project</h2>
-                    <button class="modal-close"><i class="fas fa-times"></i></button>
+                    <h2>Project Settings</h2>
+                    <button class="btn-secondary" id="close-project-settings" style="padding: 8px;">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Project Name</label>
-                        <input type="text" id="new-project-name" placeholder="My Awesome Project">
-                    </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea id="new-project-desc" placeholder="What are you building?"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Visibility</label>
-                        <div class="visibility-options">
-                            <label class="visibility-option">
-                                <input type="radio" name="visibility" value="public" checked>
-                                <div class="option-content">
-                                    <i class="fas fa-globe"></i>
-                                    <div>
-                                        <span class="option-title">Public</span>
-                                        <span class="option-desc">Visible on feed</span>
-                                    </div>
-                                </div>
-                            </label>
-                            <label class="visibility-option">
-                                <input type="radio" name="visibility" value="unlisted">
-                                <div class="option-content">
-                                    <i class="fas fa-link"></i>
-                                    <div>
-                                        <span class="option-title">Unlisted</span>
-                                        <span class="option-desc">Anyone with link</span>
-                                    </div>
-                                </div>
-                            </label>
-                            <label class="visibility-option">
-                                <input type="radio" name="visibility" value="private">
-                                <div class="option-content">
-                                    <i class="fas fa-lock"></i>
-                                    <div>
-                                        <span class="option-title">Private</span>
-                                        <span class="option-desc">Only you</span>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-secondary modal-cancel">Cancel</button>
-                    <button class="btn-primary" id="create-project-submit">
-                        <i class="fas fa-plus"></i>
-                        Create Project
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="project-settings-modal" class="modal">
-            <div class="modal-backdrop"></div>
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Project Settings</h2>
-                    <button class="modal-close"><i class="fas fa-times"></i></button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Display Name</label>
-                        <input type="text" id="project-display-name">
+                        <input type="text" id="project-name-input">
                     </div>
                     <div class="form-group">
                         <label>URL Slug</label>
-                        <div class="input-prefix">
-                            <span>@<span id="username-preview">user</span>/</span>
-                            <input type="text" id="project-slug" placeholder="my-project">
+                        <div class="username-input-wrap">
+                            <span class="prefix">@<span id="project-username-preview">user</span>/</span>
+                            <input type="text" id="project-slug-input" placeholder="my-project">
                         </div>
                         <small>Leave empty for auto-generated ID</small>
                     </div>
                     <div class="form-group">
                         <label>Description</label>
-                        <textarea id="project-description"></textarea>
+                        <textarea id="project-desc-input" rows="3" style="min-height: 80px;"></textarea>
                     </div>
                     <div class="form-group">
                         <label>Visibility</label>
-                        <select id="project-visibility">
-                            <option value="public">Public</option>
-                            <option value="unlisted">Unlisted</option>
-                            <option value="private">Private</option>
+                        <select id="project-visibility-input">
+                            <option value="public">Public - Visible on feed</option>
+                            <option value="unlisted">Unlisted - Anyone with link</option>
+                            <option value="private">Private - Only you</option>
                         </select>
                     </div>
-                    <div class="form-group danger-zone">
-                        <label>Danger Zone</label>
+                    <div class="form-group" style="padding-top: 16px; border-top: 1px solid var(--border);">
+                        <label style="color: var(--danger);">Danger Zone</label>
                         <button class="btn-danger" id="delete-project-btn">
                             <i class="fas fa-trash"></i>
                             Delete Project
@@ -395,65 +1718,51 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn-secondary modal-cancel">Cancel</button>
+                    <button class="btn-secondary" id="cancel-project-settings">Cancel</button>
                     <button class="btn-primary" id="save-project-settings">Save Changes</button>
                 </div>
             </div>
         </div>
 
-        <div id="settings-modal" class="modal">
+        <div id="username-modal">
             <div class="modal-backdrop"></div>
-            <div class="modal-content">
+            <div class="modal-box">
                 <div class="modal-header">
-                    <h2>Settings</h2>
-                    <button class="modal-close"><i class="fas fa-times"></i></button>
+                    <h2>Choose Your Username</h2>
+                    <p>This will be used in your project URLs</p>
                 </div>
                 <div class="modal-body">
-                    <div class="settings-section">
-                        <h3>Profile</h3>
-                        <div class="form-group">
-                            <label>Username</label>
-                            <input type="text" id="settings-username" placeholder="username">
-                            <small>Used in project URLs: @username/project</small>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <div class="username-input-wrap">
+                            <span class="prefix">@</span>
+                            <input type="text" id="username-input" placeholder="username" maxlength="20">
                         </div>
-                    </div>
-                    <div class="settings-section">
-                        <h3>Account</h3>
-                        <div class="account-info">
-                            <div class="info-row">
-                                <span>Email</span>
-                                <span id="settings-email-display"></span>
-                            </div>
-                            <div class="info-row">
-                                <span>Credits</span>
-                                <span id="settings-credits-display"></span>
-                            </div>
-                        </div>
+                        <div class="username-status" id="username-status"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn-secondary modal-cancel">Cancel</button>
-                    <button class="btn-primary" id="save-settings">Save</button>
+                    <button class="btn-primary" id="save-username-btn" disabled>
+                        Continue
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div id="add-file-modal" class="modal">
-            <div class="modal-backdrop"></div>
-            <div class="modal-content modal-sm">
+        <div id="add-file-modal" class="screen" style="background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); display: none;">
+            <div class="modal-box" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 400px; width: calc(100% - 40px);">
                 <div class="modal-header">
                     <h2>Add File</h2>
-                    <button class="modal-close"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Filename</label>
-                        <input type="text" id="new-filename" placeholder="script.js">
+                        <input type="text" id="new-filename-input" placeholder="script.js">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn-secondary modal-cancel">Cancel</button>
-                    <button class="btn-primary" id="add-file-submit">Add File</button>
+                    <button class="btn-secondary" id="cancel-add-file">Cancel</button>
+                    <button class="btn-primary" id="confirm-add-file">Add File</button>
                 </div>
             </div>
         </div>
