@@ -26,7 +26,7 @@
                     </div>
                     <p class="auth-subtitle">AI-Powered Code Generation</p>
                     <button id="google-login" class="btn-primary btn-google">
-                        <i class="fab fa-google"></i>
+                        <img src="/droidgenicon.png" alt="" style="width: 20px; height: 20px; border-radius: 4px;">
                         <span>Continue with Google</span>
                     </button>
                     <div class="demo-badge">
@@ -34,9 +34,8 @@
                         <span>Demo: 100K free credits!</span>
                     </div>
                 </div>
-                <div class="auth-bg">
-                    <div class="bg-gradient"></div>
-                </div>
+            <div class="auth-bg">
+                <div class="bg-gradient"></div>
             </div>
         </div>
 
@@ -246,6 +245,13 @@
                                                 </div>
                                                 <span class="cost">50 credits</span>
                                             </button>
+                                            <div class="model-option disabled">
+                                                <div class="model-option-info">
+                                                    <span class="name">Momentum Max</span>
+                                                    <span class="desc">Premium model</span>
+                                                </div>
+                                                <span class="badge-soon">Coming Soon</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="prompt-input-wrapper">
@@ -309,21 +315,30 @@
                                 <input type="radio" name="visibility" value="public" checked>
                                 <div class="option-content">
                                     <i class="fas fa-globe"></i>
-                                    <div><span class="option-title">Public</span><span class="option-desc">Visible on feed</span></div>
+                                    <div>
+                                        <span class="option-title">Public</span>
+                                        <span class="option-desc">Visible on feed</span>
+                                    </div>
                                 </div>
                             </label>
                             <label class="visibility-option">
                                 <input type="radio" name="visibility" value="unlisted">
                                 <div class="option-content">
                                     <i class="fas fa-link"></i>
-                                    <div><span class="option-title">Unlisted</span><span class="option-desc">Anyone with link</span></div>
+                                    <div>
+                                        <span class="option-title">Unlisted</span>
+                                        <span class="option-desc">Anyone with link</span>
+                                    </div>
                                 </div>
                             </label>
                             <label class="visibility-option">
                                 <input type="radio" name="visibility" value="private">
                                 <div class="option-content">
                                     <i class="fas fa-lock"></i>
-                                    <div><span class="option-title">Private</span><span class="option-desc">Only you</span></div>
+                                    <div>
+                                        <span class="option-title">Private</span>
+                                        <span class="option-desc">Only you</span>
+                                    </div>
                                 </div>
                             </label>
                         </div>
@@ -331,7 +346,10 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn-secondary modal-cancel">Cancel</button>
-                    <button class="btn-primary" id="create-project-submit"><i class="fas fa-plus"></i> Create Project</button>
+                    <button class="btn-primary" id="create-project-submit">
+                        <i class="fas fa-plus"></i>
+                        Create Project
+                    </button>
                 </div>
             </div>
         </div>
@@ -354,6 +372,7 @@
                             <span>@<span id="username-preview">user</span>/</span>
                             <input type="text" id="project-slug" placeholder="my-project">
                         </div>
+                        <small>Leave empty for auto-generated ID</small>
                     </div>
                     <div class="form-group">
                         <label>Description</label>
@@ -369,7 +388,10 @@
                     </div>
                     <div class="form-group danger-zone">
                         <label>Danger Zone</label>
-                        <button class="btn-danger" id="delete-project-btn"><i class="fas fa-trash"></i> Delete Project</button>
+                        <button class="btn-danger" id="delete-project-btn">
+                            <i class="fas fa-trash"></i>
+                            Delete Project
+                        </button>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -392,13 +414,20 @@
                         <div class="form-group">
                             <label>Username</label>
                             <input type="text" id="settings-username" placeholder="username">
+                            <small>Used in project URLs: @username/project</small>
                         </div>
                     </div>
                     <div class="settings-section">
                         <h3>Account</h3>
                         <div class="account-info">
-                            <div class="info-row"><span>Email</span><span id="settings-email-display"></span></div>
-                            <div class="info-row"><span>Credits</span><span id="settings-credits-display"></span></div>
+                            <div class="info-row">
+                                <span>Email</span>
+                                <span id="settings-email-display"></span>
+                            </div>
+                            <div class="info-row">
+                                <span>Credits</span>
+                                <span id="settings-credits-display"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -439,5 +468,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
     <script src="app.js"></script>
-    </body>
+  <script src="/api/generate.js"></script>
+</body>
 </html>
